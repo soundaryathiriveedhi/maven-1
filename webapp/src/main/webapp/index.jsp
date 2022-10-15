@@ -1,7 +1,7 @@
-Op<html>
+<html>
 <body>
 <h1>Welcome To Srini IT</h1>
- <h1>DevOps with AWS</h1>
+ 
 
 </body>
 <body style="color:red;">
