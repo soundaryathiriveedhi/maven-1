@@ -35,5 +35,4 @@ node {
 //01-10-2022 Jenkins pipeline
 
 
-//08-12-2022 I am trying to understand git merge
 
