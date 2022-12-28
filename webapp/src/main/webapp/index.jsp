@@ -1,8 +1,7 @@
 <html>
 <body>
 <h1>Welcome To Srini IT</h1>
- <h2>Welcome to Springboot with Microservices</h2>
- 
+
 
 </body>
 <body style="color:red;">
