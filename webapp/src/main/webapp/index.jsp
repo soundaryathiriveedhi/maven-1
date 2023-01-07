@@ -1,7 +1,7 @@
 <html>
 <body>
 <h1>Welcome To Srini IT</h1>
- <h2>DevOps with AWS Training Institue...!!!</h2>
+ <h2>********************************************</h2>
 
 
 </body>
