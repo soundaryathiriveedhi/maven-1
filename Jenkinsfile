@@ -24,38 +24,78 @@
     
 // }
 
- pipeline{
-	agent any
-	environment {
-		PATH = "$PATH:/opt/apache-maven-3.6.3/bin"
-        }
-	stages{
-		stage('DownloadCode'){
-			steps{
-				git "https://github.com/MRaju2022/maven.git"
-			}
-		}
-		stage('Build'){
-			steps{
-				sh 'mvn clean package'
-			}
-		}
-		stage('SonarQube Analysis'){
-			steps{
-				withSonarQubeEnv('Sonar-Server-7.8'){
-					sh "mvn sonar:sonar"
-				}
-			}
+//  pipeline{
+// 	agent any
+// 	environment {
+// 		PATH = "$PATH:/opt/apache-maven-3.6.3/bin"
+//         }
+// 	stages{
+// 		stage('DownloadCode'){
+// 			steps{
+// 				git "https://github.com/MRaju2022/maven.git"
+// 			}
+// 		}
+// 		stage('Build'){
+// 			steps{
+// 				sh 'mvn clean package'
+// 			}
+// 		}
+// 		stage('SonarQube Analysis'){
+// 			steps{
+// 				withSonarQubeEnv('Sonar-Server-7.8'){
+// 					sh "mvn sonar:sonar"
+// 				}
+// 			}
 
-		}
-		stage('Deployment'){
-		 steps{
-		     sshagent(['Tomcat-Server-Agent']) {
-                sh 'scp -o StrictHostKeyChecking=no /var/lib/jenkins/workspace/My-Pipeline-Job/webapp/target/webapp.war ec2-user@13.233.151.160:/home/ec2-user/apache-tomcat-10.0.27/webapps'
-            }
+// 		}
+// 		stage('Deployment'){
+// 		 steps{
+// 		     sshagent(['Tomcat-Server-Agent']) {
+//                 sh 'scp -o StrictHostKeyChecking=no /var/lib/jenkins/workspace/My-Pipeline-Job/webapp/target/webapp.war ec2-user@13.233.151.160:/home/ec2-user/apache-tomcat-10.0.27/webapps'
+//             }
 		     
-		 }   
-		}
-		}
-	}
+// 		 }   
+// 		}
+// 		}
+// 	}
+
+
+pipeline {
+    agent any
+    
+    environment {
+        PATH = "$PATH:/opt/apache-maven-3.6.3/bin"
+    }
+
+    stages {
+        stage('ContinuousDownload') {
+            steps {
+                git "https://github.com/MRaju2022/maven.git"
+            }
+        }
+        
+        stage('ContinuousBuild'){
+            steps{
+                
+                sh 'mvn clean package'
+            }
+        }
+        
+        stage('SonarQubeAnalysis'){
+            steps{
+                withSonarQubeEnv('Sonar-Server-7.8') {
+                    sh 'mvn sonar:sonar'
+                }
+            }
+        }
+        stage('ContinuousDeploy'){
+            steps{
+                sshagent(['Tomcat-Server-Agent']) {
+                  sh 'scp -o StrictHostKeyChecking=no webapp/target/webapp.war ec2-user@52.66.240.200:/home/ec2-user/apache-tomcat-10.0.27/webapps'
+                }
+            }
+        }
+    }
+}
+
 
