@@ -18,7 +18,7 @@ spec:
   spec: 
     containers:
     - name: mavenwebappcontainer
-      image: mraju25/mavenapp
+      image: mraju25/webapp
       ports:
       - containerPort: 8080
 ---
