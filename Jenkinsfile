@@ -60,42 +60,87 @@
 // 	}
 
 
-pipeline {
-    agent any
+// pipeline {
+//     agent any
     
-    environment {
-        PATH = "$PATH:/opt/apache-maven-3.6.3/bin"
-    }
+//     environment {
+//         PATH = "$PATH:/opt/apache-maven-3.6.3/bin"
+//     }
 
-    stages {
-        stage('ContinuousDownload') {
-            steps {
-                git "https://github.com/MRaju2022/maven.git"
-            }
-        }
+//     stages {
+//         stage('ContinuousDownload') {
+//             steps {
+//                 git "https://github.com/MRaju2022/maven.git"
+//             }
+//         }
         
-        stage('ContinuousBuild'){
-            steps{
+//         stage('ContinuousBuild'){
+//             steps{
                 
-                sh 'mvn clean package'
-            }
-        }
+//                 sh 'mvn clean package'
+//             }
+//         }
         
-        stage('SonarQubeAnalysis'){
-            steps{
-                withSonarQubeEnv('Sonar-Server-7.8') {
-                    sh 'mvn sonar:sonar'
-                }
-            }
+//         stage('SonarQubeAnalysis'){
+//             steps{
+//                 withSonarQubeEnv('Sonar-Server-7.8') {
+//                     sh 'mvn sonar:sonar'
+//                 }
+//             }
+//         }
+//         stage('ContinuousDeploy'){
+//             steps{
+//                 sshagent(['Tomcat-Server-Agent']) {
+//                   sh 'scp -o StrictHostKeyChecking=no webapp/target/webapp.war ec2-user@52.66.240.200:/home/ec2-user/apache-tomcat-10.0.27/webapps'
+//                 }
+//             }
+//         }
+//     }
+// }
+
+
+node{
+	stage('git clone'){
+		
+         git credentialsId: 'bd578fe5-d88f-4cdd-b9ef-96fa3ee294a2', url: 'https://github.com/MRaju2022/maven.git'
+	
         }
-        stage('ContinuousDeploy'){
-            steps{
-                sshagent(['Tomcat-Server-Agent']) {
-                  sh 'scp -o StrictHostKeyChecking=no webapp/target/webapp.war ec2-user@52.66.240.200:/home/ec2-user/apache-tomcat-10.0.27/webapps'
-                }
-            }
+    stage('clean and package'){
+        
+        def mavenHome = tool name: "Maven-3.8.6", type: "maven"
+
+        def mavenCMD = "${mavenHome}/bin/mvn"
+        
+        sh "${mavenCMD} clean package"
+    }
+    
+    stage('code review'){
+        withSonarQubeEnv('Sonar-Server-7.8'){
+            def mavenHome = tool name: "Maven-3.8.6", type: "maven"
+            def mavenCMD = "${mavenHome}/bin/mvn"
+            sh "${mavenCMD} sonar:sonar"
         }
     }
+    
+    
+    stage('build docker image'){
+        sh  'docker build -t mraju25/mavenwebapplication .'
+    }
+    stage('Push Image'){
+        
+      withCredentials([string(credentialsId: 'DOCKER_CREDENTIALS1', variable: 'DOCKER_CREDENTIALS')]) {
+          sh 'docker login -u mraju25 -p ${DOCKER_CREDENTIALS}'
+      }
+     
+       sh 'docker push mraju25/mavenwebapplication'
+     
+    }
+    
+    stage('app deploy'){
+        kubernetesDeploy(
+            configs: 'maven-web-app-deploy.yml',
+            kubeconfigId: 'K8S-CONFIGURATION'
+            )
+    }
+
 }
-
-
