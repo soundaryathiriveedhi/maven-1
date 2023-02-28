@@ -1,8 +1,7 @@
 <html>
 <body>
 <h1>Welcome To Srini IT</h1>
- <h2>DevOps with AWS classes</h2>
- <h2>Starts from Monday at 7:30AM</h2>
+ 
 
 
 
